@@ -3,35 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin — Tunnel Status</title>
+  <title>Admin — eSound Tunnel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23a78bfa%22 stroke-width=%222%22><path d=%22M9 18V5l12-2v13%22/><circle cx=%226%22 cy=%2218%22 r=%223%22/><circle cx=%2218%22 cy=%2216%22 r=%223%22/></svg>" />
   <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#0A0F1E" />
+  <meta name="theme-color" content="#09090f" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Tunnel" />
-  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <meta name="apple-mobile-web-app-title" content="eSound Tunnel" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0A0F1E;
-      --card: #111827;
-      --card-border: #1E2D4A;
-      --text: #E2E8F5;
-      --muted: #6B7FA3;
-      --accent: #00D4FF;
-      --accent-dim: rgba(0, 212, 255, 0.12);
-      --green: #22C55E;
-      --green-dim: rgba(34, 197, 94, 0.15);
-      --red: #EF4444;
-      --yellow: #F59E0B;
+      --bg: #09090f;
+      --card: #151525;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text: #e8e6f0;
+      --muted: #6e6b82;
+      --accent: #a78bfa;
+      --accent-dim: rgba(167, 139, 250, 0.12);
+      --green: #34d399;
+      --green-dim: rgba(52, 211, 153, 0.15);
+      --red: #fb7185;
+      --yellow: #f5b942;
       --mono: 'JetBrains Mono', monospace;
-      --sans: 'Inter', sans-serif;
+      --sans: 'Inter', -apple-system, system-ui, sans-serif;
     }
 
     body {
@@ -45,8 +46,8 @@
       justify-content: center;
       padding: 24px;
       background-image:
-        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 212, 255, 0.06) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(0, 100, 200, 0.05) 0%, transparent 60%);
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(167, 139, 250, 0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(167, 139, 250, 0.05) 0%, transparent 60%);
     }
 
     /* ── Back link ── */
@@ -78,11 +79,10 @@
     }
     .logo-icon { width: 28px; height: 28px; color: var(--accent); }
     header h1 {
-      font-size: 1.1rem;
+      font-size: 1.25rem;
       font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--accent);
+      letter-spacing: -0.01em;
+      color: var(--text);
     }
     header p {
       font-size: 0.8rem;
@@ -281,24 +281,24 @@
     </svg>
     <h1>Admin</h1>
   </div>
-  <p>Tunnel configuration &amp; update guide</p>
+  <p>Tunnel configuration &amp; automatic detection</p>
 </header>
 
 <div class="card">
 
   <!-- Steps -->
-  <div class="section-label">How to Update the Tunnel URL</div>
+  <div class="section-label">One-Time Setup — Auto-Detect New Tunnels</div>
   <ol class="steps">
 
     <li>
       <div class="step-num"></div>
       <div class="step-body">
-        <div class="step-title">Start your Cloudflare tunnel</div>
+        <div class="step-title">Set your GitHub token &amp; repo</div>
         <div class="step-desc">
-          Run the command below in your terminal, replacing <code>PORT</code> with the local port your service is listening on.
+          Open <code>watch-tunnel.sh</code> and set <code>GITHUB_REPO</code>, or export <code>GITHUB_TOKEN</code> once in your shell profile. This is the only manual step — ever.
         </div>
         <div class="cmd-block">
-          <span class="cmd-text" id="cmd1">cloudflared tunnel --url localhost:PORT</span>
+          <span class="cmd-text" id="cmd1">echo 'export GITHUB_TOKEN="ghp_your_token_here"' &gt;&gt; ~/.zshrc</span>
           <button class="copy-btn" onclick="copyCmd('cmd1', this)">Copy</button>
         </div>
       </div>
@@ -307,33 +307,33 @@
     <li>
       <div class="step-num"></div>
       <div class="step-body">
-        <div class="step-title">Grab the generated URL</div>
+        <div class="step-title">Install the watcher as a background service</div>
         <div class="step-desc">
-          Once the tunnel starts, Cloudflare will print a URL ending in <code>*.trycloudflare.com</code>. Copy the full URL from the terminal output — it changes every time the tunnel restarts.
-        </div>
-      </div>
-    </li>
-
-    <li>
-      <div class="step-num"></div>
-      <div class="step-body">
-        <div class="step-title">Update <code>tunnel-config.json</code></div>
-        <div class="step-desc">
-          Open <code>tunnel-config.json</code> in your GitHub repo and paste the new URL into the <code>tunnel_url</code> field. See the reference schema below.
-        </div>
-      </div>
-    </li>
-
-    <li>
-      <div class="step-num"></div>
-      <div class="step-body">
-        <div class="step-title">Commit &amp; push</div>
-        <div class="step-desc">
-          Push the change to your default branch. GitHub Pages will rebuild within a minute, and the status page will pick up the new URL on its next 30-second refresh — no manual reload needed.
+          Run <code>setup-watcher.sh</code> once. It registers a LaunchAgent that starts on login, restarts itself if killed, and tails eSound's <code>tunnel.log</code> continuously.
         </div>
         <div class="cmd-block">
-          <span class="cmd-text" id="cmd2">git add tunnel-config.json &amp;&amp; git commit -m "update tunnel url" &amp;&amp; git push</span>
+          <span class="cmd-text" id="cmd2">chmod +x setup-watcher.sh &amp;&amp; ./setup-watcher.sh</span>
           <button class="copy-btn" onclick="copyCmd('cmd2', this)">Copy</button>
+        </div>
+      </div>
+    </li>
+
+    <li>
+      <div class="step-num"></div>
+      <div class="step-body">
+        <div class="step-title">Forget about it</div>
+        <div class="step-desc">
+          Every time eSound's tunnel restarts — a reboot, a crash, a network blip — Cloudflare assigns a new <code>*.trycloudflare.com</code> URL. The watcher notices the new line in the log within seconds, diffs it against the last URL it pushed, and updates <code>tunnel-config.json</code> on GitHub automatically. No manual copy-paste, no terminal, no <code>git push</code>.
+        </div>
+      </div>
+    </li>
+
+    <li>
+      <div class="step-num"></div>
+      <div class="step-body">
+        <div class="step-title">Watch the status page update itself</div>
+        <div class="step-desc">
+          GitHub Pages rebuilds within a minute of the push, and the status page picks up the new URL on its next 30-second refresh — no manual reload needed.
         </div>
       </div>
     </li>
@@ -347,7 +347,8 @@
   <div class="config-box">
     <pre><span class="json-punct">{</span>
   <span class="json-key">"tunnel_url"</span><span class="json-punct">:</span>  <span class="json-str">"https://your-tunnel.trycloudflare.com"</span><span class="json-punct">,</span>
-  <span class="json-key">"github_repo"</span><span class="json-punct">:</span> <span class="json-str">"https://github.com/you/your-repo"</span>
+  <span class="json-key">"github_repo"</span><span class="json-punct">:</span> <span class="json-str">"https://github.com/you/your-repo"</span><span class="json-punct">,</span>
+  <span class="json-key">"last_updated"</span><span class="json-punct">:</span> <span class="json-str">"2026-08-21"</span>
 <span class="json-punct">}</span></pre>
   </div>
 
@@ -356,7 +357,7 @@
       <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
       <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
     </svg>
-    <p><strong>Quick tunnel URLs are temporary.</strong> Cloudflare generates a new <code>trycloudflare.com</code> hostname each time the tunnel process starts. Remember to update the config file every time you restart the tunnel.</p>
+    <p><strong>This file is now managed automatically.</strong> The watcher writes to it directly whenever a new tunnel URL appears — you shouldn't need to edit it by hand unless something's misconfigured.</p>
   </div>
 
 </div>
