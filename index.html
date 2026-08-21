@@ -7,6 +7,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0A0F1E" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Tunnel" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -225,7 +233,6 @@
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 28px;
     }
     .badge {
       display: flex;
@@ -241,59 +248,6 @@
     .badge-cf  { background: rgba(249,115,22,0.12); color: #fb923c; border: 1px solid rgba(249,115,22,0.25); }
     .badge-https { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
     .badge-github { background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
-
-    /* ── How to update ── */
-    .how-box {
-      background: var(--accent-dim);
-      border: 1px solid rgba(0,212,255,0.18);
-      border-radius: 10px;
-      padding: 16px 18px;
-      margin-bottom: 8px;
-    }
-    .how-box .how-title {
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 10px;
-    }
-    .how-box ol {
-      list-style: none;
-      counter-reset: steps;
-    }
-    .how-box ol li {
-      counter-increment: steps;
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      font-size: 0.8rem;
-      color: var(--muted);
-      line-height: 1.6;
-      margin-bottom: 6px;
-    }
-    .how-box ol li::before {
-      content: counter(steps);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 18px; height: 18px;
-      border-radius: 50%;
-      background: rgba(0,212,255,0.15);
-      color: var(--accent);
-      font-size: 0.65rem;
-      font-weight: 700;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-    .how-box code {
-      font-family: var(--mono);
-      font-size: 0.78rem;
-      color: var(--text);
-      background: rgba(0,0,0,0.3);
-      padding: 1px 5px;
-      border-radius: 4px;
-    }
 
     /* ── Footer ── */
     footer {
@@ -316,17 +270,75 @@
     }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
-    /* ── Spinner ── */
-    .spinner {
-      display: inline-block;
-      width: 14px; height: 14px;
-      border: 2px solid rgba(0,212,255,0.2);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      vertical-align: middle;
+    /* ── Admin link ── */
+    .admin-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 0.7rem;
+      text-decoration: none;
+      opacity: 0.45;
+      transition: opacity 0.2s, color 0.2s;
+      letter-spacing: 0.04em;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .admin-link:hover { opacity: 1; color: var(--accent); }
+    .admin-link svg { width: 11px; height: 11px; }
+
+    /* ── Install banner ── */
+    .install-banner {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 48px);
+      max-width: 580px;
+      background: var(--card);
+      border: 1px solid rgba(0,212,255,0.25);
+      border-radius: 12px;
+      padding: 14px 16px;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+      z-index: 999;
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateX(-50%) translateY(16px); opacity: 0; }
+      to   { transform: translateX(-50%) translateY(0);    opacity: 1; }
+    }
+    .install-banner svg { width: 20px; height: 20px; color: var(--accent); flex-shrink: 0; }
+    .install-banner .install-text { flex: 1; }
+    .install-banner .install-text strong { font-size: 0.82rem; font-weight: 600; display: block; }
+    .install-banner .install-text span { font-size: 0.73rem; color: var(--muted); }
+    .install-add {
+      background: var(--accent);
+      color: #0A0F1E;
+      border: none;
+      border-radius: 7px;
+      padding: 7px 14px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--sans);
+      white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+    .install-add:hover { opacity: 0.88; }
+    .install-dismiss {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      border-radius: 4px;
+      transition: color 0.15s;
+    }
+    .install-dismiss:hover { color: var(--text); }
+    .install-dismiss svg { width: 14px; height: 14px; }
 
     /* ── Responsive ── */
     @media (max-width: 500px) {
@@ -336,7 +348,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .pulse-ring, .refresh-dot, .spinner { animation: none; }
+      .pulse-ring, .refresh-dot { animation: none; }
     }
   </style>
 </head>
@@ -413,17 +425,6 @@
     </span>
   </div>
 
-  <!-- How to update -->
-  <div class="how-box">
-    <div class="how-title">How to Update the URL</div>
-    <ol>
-      <li>Start your Cloudflare tunnel: <code>cloudflared tunnel --url localhost:PORT</code></li>
-      <li>Copy the new <code>*.trycloudflare.com</code> URL from the terminal output</li>
-      <li>Edit <code>tunnel-config.json</code> in your GitHub repo with the new URL</li>
-      <li>Commit &amp; push — this page auto-updates within 60 seconds</li>
-    </ol>
-  </div>
-
 </div>
 
 <footer>
@@ -435,18 +436,35 @@
     Configured in <a href="tunnel-config.json" target="_blank">tunnel-config.json</a>
     · <a href="https://github.com" id="repoLink" target="_blank">GitHub Repo</a>
   </div>
+  <div style="margin-top: 4px;">
+    <a href="admin.html" class="admin-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Admin
+    </a>
+  </div>
 </footer>
 
-<script>
-// ─── Config ────────────────────────────────────────────────────────────────
-// The page reads tunnel URL from tunnel-config.json (same directory).
-// Update that file and push to GitHub when your tunnel URL changes.
-// ────────────────────────────────────────────────────────────────────────────
+<!-- Install banner -->
+<div class="install-banner" id="installBanner" role="status" aria-live="polite">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+  </svg>
+  <div class="install-text">
+    <strong>Add to Home Screen</strong>
+    <span>Monitor your tunnel from your home screen</span>
+  </div>
+  <button class="install-add" id="installBtn">Install</button>
+  <button class="install-dismiss" id="dismissBtn" aria-label="Dismiss">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+</div>
 
+<script>
 let currentUrl = '';
 let checkCount = 0;
 let liveChecks = 0;
-let firstCheckDone = false;
 let configLoaded = false;
 
 async function loadConfig() {
@@ -464,7 +482,7 @@ async function loadConfig() {
     }
     return true;
   } catch {
-    document.getElementById('urlDisplay').textContent = 'tunnel-config.json not found — see setup below';
+    document.getElementById('urlDisplay').textContent = 'tunnel-config.json not found — see admin page';
     configLoaded = false;
     return false;
   }
@@ -474,7 +492,7 @@ async function checkTunnel() {
   if (!configLoaded) {
     await loadConfig();
     if (!configLoaded) {
-      setStatus('dead', 'Config Missing', 'Create tunnel-config.json with your tunnel URL');
+      setStatus('dead', 'Config Missing', 'Visit /admin for setup instructions');
       return;
     }
   }
@@ -487,18 +505,15 @@ async function checkTunnel() {
   let status = null;
   let elapsed = null;
 
-  // We use a no-cors fetch — if the tunnel is live it loads (even opaque),
-  // if it's dead the fetch throws. This works for same-origin CORS endpoints too.
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
-    const res = await fetch(currentUrl, { method: 'HEAD', mode: 'no-cors', signal: controller.signal });
+    await fetch(currentUrl, { method: 'HEAD', mode: 'no-cors', signal: controller.signal });
     clearTimeout(timeout);
     elapsed = Date.now() - start;
-    // no-cors always gives type=opaque with status=0 — treat any resolve as live
     status = 'live';
     liveChecks++;
-  } catch (e) {
+  } catch {
     elapsed = Date.now() - start;
     status = 'dead';
   }
@@ -523,8 +538,6 @@ async function checkTunnel() {
     document.getElementById('uptimeVal').textContent = pct + '% (' + liveChecks + '/' + checkCount + ')';
     document.getElementById('uptimeVal').className = 'cell-value red';
   }
-
-  firstCheckDone = true;
 }
 
 function setStatus(state, label, sub) {
@@ -544,16 +557,53 @@ function copyUrl() {
   });
 }
 
-// ── Boot ──────────────────────────────────────────────────────────────────
 (async () => {
   await loadConfig();
   await checkTunnel();
-  // Reload config every 30s too (picks up new URLs from tunnel-config.json)
   setInterval(async () => {
     await loadConfig();
     await checkTunnel();
   }, 30000);
 })();
+
+// ── Service Worker ────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    // Listen for SW-triggered sync checks
+    navigator.serviceWorker.addEventListener('message', e => {
+      if (e.data?.type === 'SYNC_CHECK') checkTunnel();
+    });
+  });
+}
+
+// ── Install prompt ────────────────────────────────────────────────────────
+let deferredPrompt = null;
+const installBanner = document.getElementById('installBanner');
+const installBtn    = document.getElementById('installBtn');
+const dismissBtn    = document.getElementById('dismissBtn');
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBanner.style.display = 'flex';
+});
+
+installBtn?.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  installBanner.style.display = 'none';
+});
+
+dismissBtn?.addEventListener('click', () => {
+  installBanner.style.display = 'none';
+});
+
+window.addEventListener('appinstalled', () => {
+  installBanner.style.display = 'none';
+  deferredPrompt = null;
+});
 </script>
 </body>
 </html>
