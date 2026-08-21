@@ -1,0 +1,9 @@
+# Never commit these
+.env
+.env.*
+*.secret
+secrets.sh
+ 
+# macOS
+.DS_Store
+ 
