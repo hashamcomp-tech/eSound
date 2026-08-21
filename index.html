@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tunnel Status</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0A0F1E;
+      --card: #111827;
+      --card-border: #1E2D4A;
+      --text: #E2E8F5;
+      --muted: #6B7FA3;
+      --accent: #00D4FF;
+      --accent-dim: rgba(0, 212, 255, 0.12);
+      --green: #22C55E;
+      --green-dim: rgba(34, 197, 94, 0.15);
+      --red: #EF4444;
+      --red-dim: rgba(239, 68, 68, 0.15);
+      --yellow: #F59E0B;
+      --yellow-dim: rgba(245, 158, 11, 0.15);
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 212, 255, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(0, 100, 200, 0.05) 0%, transparent 60%);
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .logo-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .logo-icon {
+      width: 28px; height: 28px;
+      color: var(--accent);
+    }
+    header h1 {
+      font-family: var(--sans);
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    header p {
+      font-size: 0.8rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 36px 40px;
+      width: 100%;
+      max-width: 620px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,212,255,0.04);
+    }
+
+    /* ── Status indicator ── */
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+    .pulse-wrap {
+      position: relative;
+      width: 48px; height: 48px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pulse-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      opacity: 0;
+      animation: pulse-ring 2.4s ease-out infinite;
+    }
+    .pulse-ring:nth-child(2) { animation-delay: 0.8s; }
+    .pulse-ring:nth-child(3) { animation-delay: 1.6s; }
+    .pulse-dot {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: currentColor;
+      position: relative;
+      z-index: 1;
+      transition: background 0.4s;
+    }
+    @keyframes pulse-ring {
+      0%   { transform: scale(0.6); opacity: 0.7; }
+      100% { transform: scale(1.9); opacity: 0; }
+    }
+
+    .status-text h2 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    .status-text .sub {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    /* color states */
+    .state-live   .pulse-wrap, .state-live   .status-text h2 { color: var(--green); }
+    .state-dead   .pulse-wrap, .state-dead   .status-text h2 { color: var(--red); }
+    .state-check  .pulse-wrap, .state-check  .status-text h2 { color: var(--yellow); }
+
+    .state-dead .pulse-ring { animation: none; }
+
+    /* ── Divider ── */
+    hr {
+      border: none;
+      border-top: 1px solid var(--card-border);
+      margin-bottom: 28px;
+    }
+
+    /* ── URL block ── */
+    .label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .url-block {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #0D1424;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 28px;
+    }
+    .url-block .url-text {
+      font-family: var(--mono);
+      font-size: 0.88rem;
+      color: var(--accent);
+      word-break: break-all;
+      flex: 1;
+    }
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--card-border);
+      color: var(--muted);
+      border-radius: 6px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-family: var(--sans);
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .copy-btn:hover { color: var(--text); border-color: var(--accent); background: var(--accent-dim); }
+    .copy-btn.copied { color: var(--green); border-color: var(--green); background: var(--green-dim); }
+
+    /* ── Meta grid ── */
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .meta-cell {
+      background: #0D1424;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .meta-cell .cell-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .meta-cell .cell-value {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--text);
+      font-weight: 600;
+    }
+    .meta-cell .cell-value.green { color: var(--green); }
+    .meta-cell .cell-value.red   { color: var(--red); }
+    .meta-cell .cell-value.muted { color: var(--muted); }
+
+    /* ── Badge row ── */
+    .badge-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 99px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .badge svg { width: 12px; height: 12px; flex-shrink: 0; }
+    .badge-cf  { background: rgba(249,115,22,0.12); color: #fb923c; border: 1px solid rgba(249,115,22,0.25); }
+    .badge-https { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
+    .badge-github { background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
+
+    /* ── How to update ── */
+    .how-box {
+      background: var(--accent-dim);
+      border: 1px solid rgba(0,212,255,0.18);
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-bottom: 8px;
+    }
+    .how-box .how-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .how-box ol {
+      list-style: none;
+      counter-reset: steps;
+    }
+    .how-box ol li {
+      counter-increment: steps;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 6px;
+    }
+    .how-box ol li::before {
+      content: counter(steps);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: rgba(0,212,255,0.15);
+      color: var(--accent);
+      font-size: 0.65rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .how-box code {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text);
+      background: rgba(0,0,0,0.3);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 28px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    footer a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+    footer a:hover { color: var(--accent); }
+    .refresh-info { display: flex; align-items: center; gap: 5px; justify-content: center; }
+    .refresh-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+    /* ── Spinner ── */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(0,212,255,0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Responsive ── */
+    @media (max-width: 500px) {
+      .card { padding: 24px 20px; }
+      .meta-grid { grid-template-columns: 1fr; }
+      .url-block { flex-wrap: wrap; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .pulse-ring, .refresh-dot, .spinner { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-row">
+    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+    </svg>
+    <h1>Tunnel Status</h1>
+  </div>
+  <p>Cloudflare Quick Tunnel Monitor</p>
+</header>
+
+<div class="card" id="card">
+
+  <!-- Status -->
+  <div class="status-row state-check" id="statusRow">
+    <div class="pulse-wrap">
+      <div class="pulse-ring"></div>
+      <div class="pulse-ring"></div>
+      <div class="pulse-ring"></div>
+      <div class="pulse-dot"></div>
+    </div>
+    <div class="status-text">
+      <h2 id="statusLabel">Checking…</h2>
+      <div class="sub" id="statusSub">Probing tunnel endpoint</div>
+    </div>
+  </div>
+
+  <hr />
+
+  <!-- URL -->
+  <div class="label">Current Tunnel URL</div>
+  <div class="url-block">
+    <span class="url-text" id="urlDisplay">Loading…</span>
+    <button class="copy-btn" id="copyBtn" onclick="copyUrl()">Copy</button>
+  </div>
+
+  <!-- Meta -->
+  <div class="meta-grid">
+    <div class="meta-cell">
+      <div class="cell-label">Last Checked</div>
+      <div class="cell-value muted" id="lastChecked">—</div>
+    </div>
+    <div class="meta-cell">
+      <div class="cell-label">Response</div>
+      <div class="cell-value muted" id="responseCode">—</div>
+    </div>
+    <div class="meta-cell">
+      <div class="cell-label">Uptime</div>
+      <div class="cell-value muted" id="uptimeVal">—</div>
+    </div>
+    <div class="meta-cell">
+      <div class="cell-label">Checks Run</div>
+      <div class="cell-value muted" id="checkCount">0</div>
+    </div>
+  </div>
+
+  <!-- Badges -->
+  <div class="badge-row">
+    <span class="badge badge-cf">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 11.5c.17-.6.12-1.17-.13-1.62-.22-.42-.6-.7-1.08-.8l-9.4-.13c-.1 0-.18-.04-.24-.1s-.07-.14-.05-.23c.03-.13.15-.22.28-.22l9.48.13c1.13.05 2.35.96 2.78 2.08l.47 1.23c.04.1.04.2 0 .3-.04.1-.12.16-.22.17-.1.02-.2-.02-.27-.1l-.62-.72z"/><path d="M17.5 13.96l-.1-.62c-.04-.2-.22-.34-.43-.33l-10.9.07c-.1 0-.18.07-.18.17 0 .09.06.17.15.19l.96.2c.9.2 1.52.97 1.52 1.88v.08c0 .9-.57 1.72-1.42 2.02l-1.07.37c-.1.03-.16.12-.15.23.02.1.1.18.2.18l11.1-.07c.56 0 1.04-.4 1.14-.95l.18-1.12-.34-1.29z"/></svg>
+      Cloudflare Tunnel
+    </span>
+    <span class="badge badge-https">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      HTTPS
+    </span>
+    <span class="badge badge-github">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/></svg>
+      GitHub Pages
+    </span>
+  </div>
+
+  <!-- How to update -->
+  <div class="how-box">
+    <div class="how-title">How to Update the URL</div>
+    <ol>
+      <li>Start your Cloudflare tunnel: <code>cloudflared tunnel --url localhost:PORT</code></li>
+      <li>Copy the new <code>*.trycloudflare.com</code> URL from the terminal output</li>
+      <li>Edit <code>tunnel-config.json</code> in your GitHub repo with the new URL</li>
+      <li>Commit &amp; push — this page auto-updates within 60 seconds</li>
+    </ol>
+  </div>
+
+</div>
+
+<footer>
+  <div class="refresh-info">
+    <div class="refresh-dot"></div>
+    <span>Auto-refreshes every <strong>30 seconds</strong></span>
+  </div>
+  <div>
+    Configured in <a href="tunnel-config.json" target="_blank">tunnel-config.json</a>
+    · <a href="https://github.com" id="repoLink" target="_blank">GitHub Repo</a>
+  </div>
+</footer>
+
+<script>
+// ─── Config ────────────────────────────────────────────────────────────────
+// The page reads tunnel URL from tunnel-config.json (same directory).
+// Update that file and push to GitHub when your tunnel URL changes.
+// ────────────────────────────────────────────────────────────────────────────
+
+let currentUrl = '';
+let checkCount = 0;
+let liveChecks = 0;
+let firstCheckDone = false;
+let configLoaded = false;
+
+async function loadConfig() {
+  try {
+    const res = await fetch('tunnel-config.json?_=' + Date.now());
+    if (!res.ok) throw new Error('No config');
+    const cfg = await res.json();
+    if (cfg.tunnel_url) {
+      currentUrl = cfg.tunnel_url.trim().replace(/\/$/, '');
+      document.getElementById('urlDisplay').textContent = currentUrl;
+      configLoaded = true;
+    }
+    if (cfg.github_repo) {
+      document.getElementById('repoLink').href = cfg.github_repo;
+    }
+    return true;
+  } catch {
+    document.getElementById('urlDisplay').textContent = 'tunnel-config.json not found — see setup below';
+    configLoaded = false;
+    return false;
+  }
+}
+
+async function checkTunnel() {
+  if (!configLoaded) {
+    await loadConfig();
+    if (!configLoaded) {
+      setStatus('dead', 'Config Missing', 'Create tunnel-config.json with your tunnel URL');
+      return;
+    }
+  }
+
+  checkCount++;
+  document.getElementById('checkCount').textContent = checkCount;
+  setStatus('check', 'Checking…', 'Probing ' + currentUrl);
+
+  const start = Date.now();
+  let status = null;
+  let elapsed = null;
+
+  // We use a no-cors fetch — if the tunnel is live it loads (even opaque),
+  // if it's dead the fetch throws. This works for same-origin CORS endpoints too.
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(currentUrl, { method: 'HEAD', mode: 'no-cors', signal: controller.signal });
+    clearTimeout(timeout);
+    elapsed = Date.now() - start;
+    // no-cors always gives type=opaque with status=0 — treat any resolve as live
+    status = 'live';
+    liveChecks++;
+  } catch (e) {
+    elapsed = Date.now() - start;
+    status = 'dead';
+  }
+
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  document.getElementById('lastChecked').textContent = timeStr;
+  document.getElementById('checkCount').textContent = checkCount;
+
+  if (status === 'live') {
+    setStatus('live', 'Tunnel Active', 'Responded in ' + elapsed + ' ms');
+    document.getElementById('responseCode').textContent = elapsed + ' ms';
+    document.getElementById('responseCode').className = 'cell-value green';
+    const pct = Math.round((liveChecks / checkCount) * 100);
+    document.getElementById('uptimeVal').textContent = pct + '% (' + liveChecks + '/' + checkCount + ')';
+    document.getElementById('uptimeVal').className = pct > 80 ? 'cell-value green' : 'cell-value';
+  } else {
+    setStatus('dead', 'Tunnel Offline', 'No response from ' + currentUrl);
+    document.getElementById('responseCode').textContent = 'Timeout / unreachable';
+    document.getElementById('responseCode').className = 'cell-value red';
+    const pct = Math.round((liveChecks / checkCount) * 100);
+    document.getElementById('uptimeVal').textContent = pct + '% (' + liveChecks + '/' + checkCount + ')';
+    document.getElementById('uptimeVal').className = 'cell-value red';
+  }
+
+  firstCheckDone = true;
+}
+
+function setStatus(state, label, sub) {
+  const row = document.getElementById('statusRow');
+  row.className = 'status-row state-' + state;
+  document.getElementById('statusLabel').textContent = label;
+  document.getElementById('statusSub').textContent = sub;
+}
+
+function copyUrl() {
+  if (!currentUrl) return;
+  navigator.clipboard.writeText(currentUrl).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+(async () => {
+  await loadConfig();
+  await checkTunnel();
+  // Reload config every 30s too (picks up new URLs from tunnel-config.json)
+  setInterval(async () => {
+    await loadConfig();
+    await checkTunnel();
+  }, 30000);
+})();
+</script>
+</body>
+</html>
