@@ -5,16 +5,27 @@
 # automatically pushes it to your GitHub repo so the status page updates.
 #
 # SETUP (one time):
-#   1. Fill in the three variables below
-#   2. chmod +x start-tunnel.sh
-#   3. ./start-tunnel.sh 8080        (or whatever port your app uses)
+#   1. Add your token to ~/.zshrc (NEVER put it in this file):
+#        echo 'export GITHUB_TOKEN="ghp_your_token_here"' >> ~/.zshrc
+#        source ~/.zshrc
+#   2. Edit GITHUB_REPO below (safe to commit — it's just your repo name)
+#   3. chmod +x start-tunnel.sh
+#   4. ./start-tunnel.sh 8080
 # ─────────────────────────────────────────────────────────────────────────────
 
-# ── ✏️  Edit these three lines ────────────────────────────────────────────────
-GITHUB_TOKEN="ghp_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"  # Personal Access Token (repo scope)
-GITHUB_REPO="YOUR-USERNAME/YOUR-REPO-NAME"               # e.g. johndoe/tunnel-status
-LOCAL_PORT="${1:-8080}"                                   # default port 8080, or pass as arg
+# ── ✏️  Edit this one line (safe to commit) ───────────────────────────────────
+GITHUB_REPO="YOUR-USERNAME/YOUR-REPO-NAME"   # e.g. johndoe/tunnel-status
+LOCAL_PORT="${1:-8080}"                       # or change default port here
 # ─────────────────────────────────────────────────────────────────────────────
+
+# ── Token comes from environment — never hardcode it here ────────────────────
+# Set once in terminal: echo 'export GITHUB_TOKEN="ghp_..."' >> ~/.zshrc
+if [[ -z "${GITHUB_TOKEN:-}" ]]; then
+  echo -e "\033[0;31m[tunnel]\033[0m GITHUB_TOKEN is not set in your environment."
+  echo -e "\033[0;31m[tunnel]\033[0m Run this once, then open a new terminal:"
+  echo -e "\033[1m         echo 'export GITHUB_TOKEN=\"ghp_your_token_here\"' >> ~/.zshrc\033[0m"
+  exit 1
+fi
 
 set -euo pipefail
 
